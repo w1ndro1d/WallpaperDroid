@@ -31,36 +31,39 @@ namespace WallpaperDroid
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(tagForm));
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.searchTextBox = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.saveStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restoreMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.saveStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nextStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.previousStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filterStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.screenResLabel = new System.Windows.Forms.Label();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.tagListBox = new System.Windows.Forms.ListBox();
+            this.addTagButton = new System.Windows.Forms.Button();
+            this.removeTagButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // textBox1
+            // searchTextBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(6, 19);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(345, 20);
-            this.textBox1.TabIndex = 0;
-            this.toolTip1.SetToolTip(this.textBox1, "Type the relevant tags/filters to get wallpapers of your choice, separated by com" +
-        "mas. Leave empty if you wish to get random wallpapers and click Apply.");
+            this.searchTextBox.Location = new System.Drawing.Point(6, 19);
+            this.searchTextBox.Name = "searchTextBox";
+            this.searchTextBox.Size = new System.Drawing.Size(313, 20);
+            this.searchTextBox.TabIndex = 0;
+            this.toolTip1.SetToolTip(this.searchTextBox, resources.GetString("searchTextBox.ToolTip"));
+            this.searchTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.searchTextBox_KeyPress);
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(133, 45);
+            this.button1.Location = new System.Drawing.Point(262, 167);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 1;
@@ -70,11 +73,10 @@ namespace WallpaperDroid
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.textBox1);
-            this.groupBox1.Controls.Add(this.button1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
+            this.groupBox1.Controls.Add(this.searchTextBox);
+            this.groupBox1.Location = new System.Drawing.Point(12, 113);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(357, 72);
+            this.groupBox1.Size = new System.Drawing.Size(325, 48);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Search tag(s)";
@@ -85,78 +87,114 @@ namespace WallpaperDroid
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
+            this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.filterStripMenuItem,
+            this.restoreMenuItem,
             this.toolStripSeparator1,
             this.saveStripMenuItem,
+            this.toolStripSeparator3,
             this.nextStripMenuItem,
-            this.previousStripMenuItem,
             this.toolStripSeparator2,
             this.exitToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(211, 126);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(165, 110);
             // 
-            // saveStripMenuItem
+            // restoreMenuItem
             // 
-            this.saveStripMenuItem.Name = "saveStripMenuItem";
-            this.saveStripMenuItem.Size = new System.Drawing.Size(210, 22);
-            this.saveStripMenuItem.Text = "Restore original wallpaper";
-            this.saveStripMenuItem.Click += new System.EventHandler(this.saveStripMenuItem_Click);
+            this.restoreMenuItem.Name = "restoreMenuItem";
+            this.restoreMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.restoreMenuItem.Text = "WallpaperDroid";
+            this.restoreMenuItem.Click += new System.EventHandler(this.restoreStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(207, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(161, 6);
+            // 
+            // saveStripMenuItem
+            // 
+            this.saveStripMenuItem.Name = "saveStripMenuItem";
+            this.saveStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.saveStripMenuItem.Text = "Revert to original";
+            this.saveStripMenuItem.Click += new System.EventHandler(this.saveStripMenuItem_Click);
             // 
             // nextStripMenuItem
             // 
             this.nextStripMenuItem.Name = "nextStripMenuItem";
-            this.nextStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.nextStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.nextStripMenuItem.Text = "Next";
             this.nextStripMenuItem.Click += new System.EventHandler(this.nextStripMenuItem_Click);
-            // 
-            // previousStripMenuItem
-            // 
-            this.previousStripMenuItem.Name = "previousStripMenuItem";
-            this.previousStripMenuItem.Size = new System.Drawing.Size(210, 22);
-            this.previousStripMenuItem.Text = "Previous";
-            // 
-            // filterStripMenuItem
-            // 
-            this.filterStripMenuItem.Name = "filterStripMenuItem";
-            this.filterStripMenuItem.Size = new System.Drawing.Size(210, 22);
-            this.filterStripMenuItem.Text = "WallpaperDroid";
-            this.filterStripMenuItem.Click += new System.EventHandler(this.filterStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(207, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(161, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // screenResLabel
             // 
             this.screenResLabel.AutoSize = true;
-            this.screenResLabel.Location = new System.Drawing.Point(15, 91);
+            this.screenResLabel.Location = new System.Drawing.Point(15, 172);
             this.screenResLabel.Name = "screenResLabel";
             this.screenResLabel.Size = new System.Drawing.Size(115, 13);
             this.screenResLabel.TabIndex = 3;
             this.screenResLabel.Text = "Your screen resolution:";
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(161, 6);
+            // 
+            // tagListBox
+            // 
+            this.tagListBox.FormattingEnabled = true;
+            this.tagListBox.Location = new System.Drawing.Point(12, 12);
+            this.tagListBox.Name = "tagListBox";
+            this.tagListBox.Size = new System.Drawing.Size(325, 95);
+            this.tagListBox.Sorted = true;
+            this.tagListBox.TabIndex = 4;
+            this.toolTip1.SetToolTip(this.tagListBox, "Your applied tag(s) will show up here.");
+            // 
+            // addTagButton
+            // 
+            this.addTagButton.Location = new System.Drawing.Point(344, 130);
+            this.addTagButton.Name = "addTagButton";
+            this.addTagButton.Size = new System.Drawing.Size(25, 23);
+            this.addTagButton.TabIndex = 5;
+            this.addTagButton.Text = "+";
+            this.toolTip1.SetToolTip(this.addTagButton, "Add tag.");
+            this.addTagButton.UseVisualStyleBackColor = true;
+            this.addTagButton.Click += new System.EventHandler(this.addTagButton_Click);
+            // 
+            // removeTagButton
+            // 
+            this.removeTagButton.Location = new System.Drawing.Point(343, 50);
+            this.removeTagButton.Name = "removeTagButton";
+            this.removeTagButton.Size = new System.Drawing.Size(26, 23);
+            this.removeTagButton.TabIndex = 6;
+            this.removeTagButton.Text = "-";
+            this.toolTip1.SetToolTip(this.removeTagButton, "Remove selected tag.");
+            this.removeTagButton.UseVisualStyleBackColor = true;
+            this.removeTagButton.Click += new System.EventHandler(this.removeTagButton_Click);
+            // 
             // tagForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(379, 113);
+            this.ClientSize = new System.Drawing.Size(377, 201);
+            this.Controls.Add(this.removeTagButton);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.addTagButton);
+            this.Controls.Add(this.tagListBox);
             this.Controls.Add(this.screenResLabel);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -183,13 +221,16 @@ namespace WallpaperDroid
         private System.Windows.Forms.ToolStripMenuItem saveStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem nextStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem previousStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem filterStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem restoreMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox searchTextBox;
         private System.Windows.Forms.Label screenResLabel;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ListBox tagListBox;
+        private System.Windows.Forms.Button addTagButton;
+        private System.Windows.Forms.Button removeTagButton;
     }
 }
 

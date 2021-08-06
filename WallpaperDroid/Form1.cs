@@ -17,8 +17,15 @@ namespace WallpaperDroid
 {
     public partial class tagForm : Form
     {
-        const string apiURL = "https://wallhaven.cc/api/v1/search?categories=111&purity=100&sorting=random&order=desc"; //wallhaven.cc search API link
+        //random wallhaven.cc image search API link. sorting=random guarantees unique image almost everytime
+        //category=111 includes all categories ->  general, anime, people
+        static string apiURL = "https://wallhaven.cc/api/v1/search?categories=111&sorting=random";
         private static readonly HttpClient Client = new HttpClient(); //MSDN says instantiate once per program
+
+        static int listCount = 0;
+
+        static string[] apiURLRandom = new string[5];
+        static string[] searchTag = new string[5];//searchTag[0] to searchTag[4] for 5 search tags 
 
         string screenWidth = Screen.PrimaryScreen.Bounds.Width.ToString();//screen width
         string screenHeight = Screen.PrimaryScreen.Bounds.Height.ToString();//screen height
@@ -47,7 +54,12 @@ namespace WallpaperDroid
                 Directory.CreateDirectory(saveToPath);
 
             //safeguard original wallpaper on form load
-            File.Copy(originalWallpaper, Path.Combine(saveToPath,Path.GetFileName(originalWallpaper)), true);//overwrite=true
+            try
+            {
+                File.Copy(originalWallpaper, Path.Combine(saveToPath, Path.GetFileName(originalWallpaper)), true);//overwrite=true
+            }
+            catch {}
+
 
             screenResLabel.Text ="Your screen resolution: "+screenWidth+" x "+screenHeight;//shows resolution info
         }
@@ -68,35 +80,80 @@ namespace WallpaperDroid
 
         private void button1_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
+            this.Hide();//minimize to tray once filters have been provided
+            Array.Clear(apiURLRandom, 0, 5);//reset array everytime button is pressed before assigning again below
+
+            //apply custom resolution and keywords
+
+            /*for (int i = 0; i < tagListBox.Items.Count; i++)
+            {
+                //array of apiURLs that will be chosen at random to give room for all tags to take effect
+                apiURLRandom[i] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[i] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+            }*/
+
+            apiURLRandom[0] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[0] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+            apiURLRandom[1] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[1] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+            apiURLRandom[2] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[2] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+            apiURLRandom[3] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[3] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+            apiURLRandom[4] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[4] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+
+
+
         }
 
-        private void filterStripMenuItem_Click(object sender, EventArgs e)
+        private void restoreStripMenuItem_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Normal;
-            notifyIcon1.BalloonTipTitle = "WallpaperDroid";
-            notifyIcon1.BalloonTipText = "Filter has been applied!";
-            notifyIcon1.Text = "WallpaperDroid";
+            this.Show();
+            
         }
 
         private async void nextStripMenuItem_Click(object sender, EventArgs e)
         {
+            //get list of non-empty indices in searchTag
+            List<int> indexesNotNull = new List<int>();
+            for (int i = 0; i < searchTag.Length; i++)
+            {
+                if (searchTag[i] != null)
+                {
+                    indexesNotNull.Add(i);
+                }
+            }
+
+
+            //select random apiURL from apiURLRandom[0] to apiURLRandom[maxindex]
+            Random rand = new Random();
+            apiURL = apiURLRandom[rand.Next(0,indexesNotNull.Count())];
+
             //get API response from wallhaven with async and await so our UI doesn't lag while it receives wallpapers
-            var apiResponse = await getTopWallpapersAsync();
-            var wallpaperURL = apiResponse.data.First().path;//the first link inside data will be stored
+            try
+            {
+                var apiResponse = await getTopWallpapersAsync();
+                var wallpaperURL = apiResponse.data.First().path;//the first link inside data will be stored
+                nextStripMenuItem.Enabled = false;
 
-            //code to set this wallpaper//
-            var wallpaperPath = await downloadWallpaperAsync(wallpaperURL);//download fetched wallpaperURL
-            setWallpaper(wallpaperPath);//set desktop wallpaper
-            
+                //code to set this wallpaper//
+                var wallpaperPath = await downloadWallpaperAsync(wallpaperURL);//download fetched wallpaperURL
+                setWallpaper(wallpaperPath);//set desktop wallpaper
+                nextStripMenuItem.Enabled = true;
+            }
+           
+            catch (IOException)
+            {
+                nextStripMenuItem.Enabled = true;
+                return;
 
-            
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Please try again later! "+ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+
+
         }
-
-        private void setWallpaper(string wallpaperPath)
-        {
-            SystemParametersInfo(0x0014, 0, wallpaperPath, 0x0001);
-        }
+            
 
         private static async Task<SearchResponse> getTopWallpapersAsync()
         {
@@ -105,6 +162,11 @@ namespace WallpaperDroid
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<SearchResponse>(json);
             
+        }
+
+        private void setWallpaper(string wallpaperPath)
+        {
+            SystemParametersInfo(0x0014, 0, wallpaperPath, 0x0001);
         }
 
         private void saveStripMenuItem_Click(object sender, EventArgs e)
@@ -131,7 +193,58 @@ namespace WallpaperDroid
             }
             return wallpaperPath;
         }
-        
-       
+
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            this.WindowState = FormWindowState.Normal;
+            this.Show();
+        }
+
+        private void searchTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            //doesn't allow special characters to be typed in
+            e.Handled = e.KeyChar != (char)Keys.Back && !char.IsSeparator(e.KeyChar) && !char.IsLetter(e.KeyChar) && !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+        }
+
+        private void addTagButton_Click(object sender, EventArgs e)
+        {
+            
+            if (searchTextBox.Text == "")
+            {
+                MessageBox.Show("Search tag can't be empty!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (tagListBox.Items.Count >= 5)
+            {
+                MessageBox.Show("Sorry! You can't add more than 5 tags at a time.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                listCount = 5;
+                return;
+            }
+
+            tagListBox.Items.Add(searchTextBox.Text);
+            
+            searchTextBox.Text = "";
+
+            try
+            {
+                searchTag[listCount] = tagListBox.Items[listCount].ToString();
+                listCount++;
+            }
+            catch { }
+
+          
+
+        }
+
+        private void removeTagButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                tagListBox.Items.RemoveAt(tagListBox.SelectedIndex);
+                Array.Clear(searchTag, tagListBox.SelectedIndex, 0);
+            }
+            catch { }
+        }
     }
 }
