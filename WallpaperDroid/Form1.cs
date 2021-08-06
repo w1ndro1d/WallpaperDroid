@@ -22,10 +22,10 @@ namespace WallpaperDroid
         static string apiURL = "https://wallhaven.cc/api/v1/search?categories=111&sorting=random";
         private static readonly HttpClient Client = new HttpClient(); //MSDN says instantiate once per program
 
-        static int listCount = 0;
+        /*static int listCount = 0;*/
 
-        static string[] apiURLRandom = new string[5];
-        static string[] searchTag = new string[5];//searchTag[0] to searchTag[4] for 5 search tags 
+        static string[] apiURLRandom = new string[3];
+        /*static string[] searchTag = new string[3];//searchTag[0] to searchTag[4] for 5 search tags */
 
         string screenWidth = Screen.PrimaryScreen.Bounds.Width.ToString();//screen width
         string screenHeight = Screen.PrimaryScreen.Bounds.Height.ToString();//screen height
@@ -81,7 +81,7 @@ namespace WallpaperDroid
         private void button1_Click(object sender, EventArgs e)
         {
             this.Hide();//minimize to tray once filters have been provided
-            Array.Clear(apiURLRandom, 0, 5);//reset array everytime button is pressed before assigning again below
+            Array.Clear(apiURLRandom, 0, 3);//reset array everytime button is pressed before assigning again below
 
             //apply custom resolution and keywords
 
@@ -91,12 +91,13 @@ namespace WallpaperDroid
                 apiURLRandom[i] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[i] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
             }*/
 
-            apiURLRandom[0] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[0] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
-            apiURLRandom[1] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[1] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
-            apiURLRandom[2] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[2] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
-            apiURLRandom[3] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[3] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
-            apiURLRandom[4] = "https://wallhaven.cc/api/v1/search?q=" + searchTag[4] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
-
+            try
+            {
+                apiURLRandom[0] = "https://wallhaven.cc/api/v1/search?q=" + tagListBox.Items[0] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+                apiURLRandom[1] = "https://wallhaven.cc/api/v1/search?q=" + tagListBox.Items[1] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+                apiURLRandom[2] = "https://wallhaven.cc/api/v1/search?q=" + tagListBox.Items[2] + "&categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
+            }
+            catch { }
 
 
         }
@@ -110,7 +111,7 @@ namespace WallpaperDroid
 
         private async void nextStripMenuItem_Click(object sender, EventArgs e)
         {
-            //get list of non-empty indices in searchTag
+            /*//get list of non-empty indices in searchTag
             List<int> indexesNotNull = new List<int>();
             for (int i = 0; i < searchTag.Length; i++)
             {
@@ -118,12 +119,12 @@ namespace WallpaperDroid
                 {
                     indexesNotNull.Add(i);
                 }
-            }
+            }*/
 
 
             //select random apiURL from apiURLRandom[0] to apiURLRandom[maxindex]
             Random rand = new Random();
-            apiURL = apiURLRandom[rand.Next(0,indexesNotNull.Count())];
+            apiURL = apiURLRandom[rand.Next(0,tagListBox.Items.Count)];
 
             //get API response from wallhaven with async and await so our UI doesn't lag while it receives wallpapers
             try
@@ -215,23 +216,22 @@ namespace WallpaperDroid
                 return;
             }
 
-            if (tagListBox.Items.Count >= 5)
+            if (tagListBox.Items.Count >= 3)
             {
-                MessageBox.Show("Sorry! You can't add more than 5 tags at a time.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                listCount = 5;
+                MessageBox.Show("Sorry! You can't add more than 3 tags at a time.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                /*listCount = 3;*/
                 return;
             }
 
             tagListBox.Items.Add(searchTextBox.Text);
-            
             searchTextBox.Text = "";
 
-            try
+            /*try
             {
                 searchTag[listCount] = tagListBox.Items[listCount].ToString();
                 listCount++;
             }
-            catch { }
+            catch { }*/
 
           
 
@@ -242,7 +242,7 @@ namespace WallpaperDroid
             try
             {
                 tagListBox.Items.RemoveAt(tagListBox.SelectedIndex);
-                Array.Clear(searchTag, tagListBox.SelectedIndex, 0);
+                
             }
             catch { }
         }
