@@ -121,7 +121,8 @@
     <value>285, 17</value>
   </metadata>
   <data name="searchTextBox.ToolTip" xml:space="preserve">
-    <value>Type the relevant tags/filters to get wallpapers of your choice. Maximum of 5 tags are allowed. Press the + after typing a tag to add it onto the list above. 
+    <value>Type the relevant tags/filters to get wallpapers of your choice. Maximum of 3 tags are allowed. Press the + after typing a tag to add it onto the list above. 
+If you want to include a tag with multiple words, separate each word by a '+'. E.g. type anime+girl for anime girl.
 Leave empty if you wish to get random wallpapers and click Apply.</value>
   </data>
   <metadata name="notifyIcon1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

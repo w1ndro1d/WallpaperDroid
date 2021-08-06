@@ -39,15 +39,15 @@ namespace WallpaperDroid
             this.restoreMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.saveStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.nextStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.screenResLabel = new System.Windows.Forms.Label();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.tagListBox = new System.Windows.Forms.ListBox();
             this.addTagButton = new System.Windows.Forms.Button();
             this.removeTagButton = new System.Windows.Forms.Button();
+            this.screenResLabel = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -65,7 +65,7 @@ namespace WallpaperDroid
             // 
             this.button1.Location = new System.Drawing.Point(262, 167);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(103, 23);
             this.button1.TabIndex = 1;
             this.button1.Text = "Apply";
             this.button1.UseVisualStyleBackColor = true;
@@ -74,9 +74,10 @@ namespace WallpaperDroid
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.searchTextBox);
-            this.groupBox1.Location = new System.Drawing.Point(12, 113);
+            this.groupBox1.Controls.Add(this.tagListBox);
+            this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(325, 48);
+            this.groupBox1.Size = new System.Drawing.Size(325, 141);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Search tag(s)";
@@ -121,6 +122,11 @@ namespace WallpaperDroid
             this.saveStripMenuItem.Text = "Revert to original";
             this.saveStripMenuItem.Click += new System.EventHandler(this.saveStripMenuItem_Click);
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(161, 6);
+            // 
             // nextStripMenuItem
             // 
             this.nextStripMenuItem.Name = "nextStripMenuItem";
@@ -140,33 +146,26 @@ namespace WallpaperDroid
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
-            // screenResLabel
+            // toolTip1
             // 
-            this.screenResLabel.AutoSize = true;
-            this.screenResLabel.Location = new System.Drawing.Point(15, 172);
-            this.screenResLabel.Name = "screenResLabel";
-            this.screenResLabel.Size = new System.Drawing.Size(115, 13);
-            this.screenResLabel.TabIndex = 3;
-            this.screenResLabel.Text = "Your screen resolution:";
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(161, 6);
+            this.toolTip1.AutomaticDelay = 1000;
+            this.toolTip1.AutoPopDelay = 10000;
+            this.toolTip1.InitialDelay = 200;
+            this.toolTip1.ReshowDelay = 40;
             // 
             // tagListBox
             // 
             this.tagListBox.FormattingEnabled = true;
-            this.tagListBox.Location = new System.Drawing.Point(12, 12);
+            this.tagListBox.Location = new System.Drawing.Point(6, 45);
             this.tagListBox.Name = "tagListBox";
-            this.tagListBox.Size = new System.Drawing.Size(325, 95);
+            this.tagListBox.Size = new System.Drawing.Size(313, 82);
             this.tagListBox.Sorted = true;
             this.tagListBox.TabIndex = 4;
             this.toolTip1.SetToolTip(this.tagListBox, "Your applied tag(s) will show up here.");
             // 
             // addTagButton
             // 
-            this.addTagButton.Location = new System.Drawing.Point(344, 130);
+            this.addTagButton.Location = new System.Drawing.Point(340, 28);
             this.addTagButton.Name = "addTagButton";
             this.addTagButton.Size = new System.Drawing.Size(25, 23);
             this.addTagButton.TabIndex = 5;
@@ -177,7 +176,7 @@ namespace WallpaperDroid
             // 
             // removeTagButton
             // 
-            this.removeTagButton.Location = new System.Drawing.Point(343, 50);
+            this.removeTagButton.Location = new System.Drawing.Point(340, 57);
             this.removeTagButton.Name = "removeTagButton";
             this.removeTagButton.Size = new System.Drawing.Size(26, 23);
             this.removeTagButton.TabIndex = 6;
@@ -186,15 +185,23 @@ namespace WallpaperDroid
             this.removeTagButton.UseVisualStyleBackColor = true;
             this.removeTagButton.Click += new System.EventHandler(this.removeTagButton_Click);
             // 
+            // screenResLabel
+            // 
+            this.screenResLabel.AutoSize = true;
+            this.screenResLabel.Location = new System.Drawing.Point(15, 172);
+            this.screenResLabel.Name = "screenResLabel";
+            this.screenResLabel.Size = new System.Drawing.Size(118, 13);
+            this.screenResLabel.TabIndex = 3;
+            this.screenResLabel.Text = "Your screen resolution: ";
+            // 
             // tagForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(377, 201);
+            this.ClientSize = new System.Drawing.Size(377, 198);
             this.Controls.Add(this.removeTagButton);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.addTagButton);
-            this.Controls.Add(this.tagListBox);
             this.Controls.Add(this.screenResLabel);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;

@@ -69,7 +69,7 @@ namespace WallpaperDroid
             if(WindowState==FormWindowState.Minimized)
             {
                 this.Hide();
-                notifyIcon1.ShowBalloonTip(1000);
+                notifyIcon1.ShowBalloonTip(2000);
             }
         }
 
@@ -203,8 +203,9 @@ namespace WallpaperDroid
 
         private void searchTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            //doesn't allow special characters to be typed in
-            e.Handled = e.KeyChar != (char)Keys.Back && !char.IsSeparator(e.KeyChar) && !char.IsLetter(e.KeyChar) && !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+            //doesn't allow white spaces to be typed in
+            e.Handled = e.KeyChar != (char)Keys.Back && !char.IsLetter(e.KeyChar) && !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+            e.Handled = (e.KeyChar == (char)Keys.Space);
         }
 
         private void addTagButton_Click(object sender, EventArgs e)
@@ -246,5 +247,7 @@ namespace WallpaperDroid
             }
             catch { }
         }
+
+        
     }
 }
