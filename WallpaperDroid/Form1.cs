@@ -6,16 +6,18 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Timers;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
+using Timer = System.Windows.Forms.Timer;
 
 namespace WallpaperDroid
 {
-    public partial class tagForm : Form
+    public partial class tagForm : MetroFramework.Forms.MetroForm
     {
         //random wallhaven.cc image search API link. sorting=random guarantees unique image almost everytime
         //category=111 includes all categories ->  general, anime, people
@@ -23,6 +25,8 @@ namespace WallpaperDroid
         private static readonly HttpClient Client = new HttpClient(); //MSDN says instantiate once per program
 
         /*static int listCount = 0;*/
+
+        const double changeInterval = 60 * 60 * 1000;//1 hour into milliseconds
 
         static string[] apiURLRandom = new string[3];
         /*static string[] searchTag = new string[3];//searchTag[0] to searchTag[4] for 5 search tags */
@@ -37,6 +41,8 @@ namespace WallpaperDroid
 
         [DllImport("user32.dll",CharSet = CharSet.Auto)]//import user32.dll for setting wallpapers
         static extern bool SystemParametersInfo(uint uiAction, uint uiParam, string pvParam, uint fwinIni);//SystemParametersInfo API call. Refer msdn docs for SPI_SETDESKWALLPAPER
+
+        private int _ticks;//track the no of ticks
 
         public tagForm()
         {
@@ -66,11 +72,11 @@ namespace WallpaperDroid
 
         private void tagForm_Resize(object sender, EventArgs e)
         {
-            if(WindowState==FormWindowState.Minimized)
-            {
-                this.Hide();
-                notifyIcon1.ShowBalloonTip(2000);
-            }
+            this.WindowState = FormWindowState.Minimized;
+            this.Hide();
+            notifyIcon1.Visible = true;
+            notifyIcon1.ShowBalloonTip(1000);
+          
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -121,36 +127,48 @@ namespace WallpaperDroid
                 }
             }*/
 
-
-            //select random apiURL from apiURLRandom[0] to apiURLRandom[maxindex]
-            Random rand = new Random();
-            apiURL = apiURLRandom[rand.Next(0,tagListBox.Items.Count)];
-
-            //get API response from wallhaven with async and await so our UI doesn't lag while it receives wallpapers
-            try
+            if (tagListBox.Items.Count == 0)
             {
-                var apiResponse = await getTopWallpapersAsync();
-                var wallpaperURL = apiResponse.data.First().path;//the first link inside data will be stored
-                nextStripMenuItem.Enabled = false;
-
-                //code to set this wallpaper//
-                var wallpaperPath = await downloadWallpaperAsync(wallpaperURL);//download fetched wallpaperURL
-                setWallpaper(wallpaperPath);//set desktop wallpaper
-                nextStripMenuItem.Enabled = true;
+                apiURL = "https://wallhaven.cc/api/v1/search?categories=111&atleast=" + screenWidth + "x" + screenHeight + "&sorting=random";
             }
-           
-            catch (IOException)
+            else
             {
-                nextStripMenuItem.Enabled = true;
-                return;
-
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show("Please try again later! "+ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                //select random apiURL from apiURLRandom[0] to apiURLRandom[maxindex]
+                Random rand = new Random();
+                apiURL = apiURLRandom[rand.Next(0, tagListBox.Items.Count)];
             }
 
+            bool tryagain = true;
+
+            while (tryagain)
+            {
+                //get API response from wallhaven with async and await so our UI doesn't lag while it receives wallpapers
+                try
+                {
+                    var apiResponse = await getTopWallpapersAsync();
+                    var wallpaperURL = apiResponse.data.First().path;//the first link inside data will be stored
+                    nextStripMenuItem.Enabled = false;
+
+                    //code to set this wallpaper//
+                    var wallpaperPath = await downloadWallpaperAsync(wallpaperURL);//download fetched wallpaperURL
+                    setWallpaper(wallpaperPath);//set desktop wallpaper
+                    tryagain = false;//if no exception occurs, no need of running try block again
+                    nextStripMenuItem.Enabled = true;
+                }
+
+                catch (IOException)
+                {
+                    tryagain = true;//if file already exists, try again
+                    nextStripMenuItem.Enabled = true;
+                    return;
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Please try again later! " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
 
 
         }
@@ -213,13 +231,13 @@ namespace WallpaperDroid
             
             if (searchTextBox.Text == "")
             {
-                MessageBox.Show("Search tag can't be empty!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Search tag can't be empty!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (tagListBox.Items.Count >= 3)
             {
-                MessageBox.Show("Sorry! You can't add more than 3 tags at a time.", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Sorry! You can't add more than 3 tags at a time.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 /*listCount = 3;*/
                 return;
             }
@@ -248,6 +266,39 @@ namespace WallpaperDroid
             catch { }
         }
 
-        
+   
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (textBox1.Text == "")
+            {
+                MessageBox.Show("Please specify the time interval between wallpaper changes!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            button2.Text = "Stop task";
+            timer1.Start();
+            dueChangeLabel.Visible = true;
+            
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            _ticks++;
+            dueChangeLabel.Text = "Next change due in: " + _ticks.ToString();
+        }
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            //only allow numbers
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+            {
+                e.Handled = true;
+            }
+
+            // only allow one decimal point
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
+        }
     }
 }
