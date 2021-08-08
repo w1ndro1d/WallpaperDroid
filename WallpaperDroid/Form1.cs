@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -267,10 +268,18 @@ namespace WallpaperDroid
                 MessageBox.Show("Please specify the time interval between wallpaper changes!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            else if (Int32.Parse(textBox1.Text)<10)
+            {
+                MessageBox.Show("Interval needs to be at least 10 seconds!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             if (button2.Text == "Schedule task")
             {
                 button2.Text = "Stop task";
+                button1.Enabled = false;
+                addTagButton.Enabled = false;
+                removeTagButton.Enabled = false;
                 _ticks = 0;
                 nextTaskCountTimer.Start();
                 scheduleTimer.Interval = Int32.Parse(textBox1.Text) * 1000;
@@ -281,6 +290,9 @@ namespace WallpaperDroid
             else if(button2.Text == "Stop task")
             {
                 button2.Text = "Schedule task";
+                button1.Enabled = true;
+                addTagButton.Enabled = true;
+                removeTagButton.Enabled = true;
                 nextTaskCountTimer.Stop();
                 scheduleTimer.Stop();
                 dueChangeLabel.Visible = false;
@@ -289,17 +301,23 @@ namespace WallpaperDroid
                         
         }
 
+
         private void nextTaskCountTimer_Tick(object sender, EventArgs e)
-        {
-            _ticks++;
+        {               
+            _ticks++;//increases every second
             if (_ticks == Int32.Parse(textBox1.Text))
+            {//reset _ticks once _ticks=entered interval
                 _ticks = 0;
+
+            }
             dueChangeLabel.Text = "Next change due in: " + (Int32.Parse(textBox1.Text) - _ticks).ToString();
         }
 
         private void scheduleTimer_Tick(object sender, EventArgs e)
         {
-            nextStripMenuItem_Click(sender,e);
+            
+           nextStripMenuItem_Click(sender,e);//simply call next method
+            
         }
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
