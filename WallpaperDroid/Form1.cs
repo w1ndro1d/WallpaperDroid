@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
+using System;
 using System.IO;
-using System.Timers;
+using System.Linq;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Microsoft.Win32;
-using System.Runtime.InteropServices;
-using Timer = System.Windows.Forms.Timer;
 
 namespace WallpaperDroid
 {
@@ -26,7 +19,6 @@ namespace WallpaperDroid
 
         /*static int listCount = 0;*/
 
-        const double changeInterval = 60 * 60 * 1000;//1 hour into milliseconds
 
         static string[] apiURLRandom = new string[3];
         /*static string[] searchTag = new string[3];//searchTag[0] to searchTag[4] for 5 search tags */
@@ -39,7 +31,7 @@ namespace WallpaperDroid
         //to get current wallpaper location to revert back to it if user desires
         string originalWallpaper = Registry.GetValue(@"HKEY_CURRENT_USER\Control Panel\Desktop", "Wallpaper", 0).ToString();//(keyname,valuename,default value if valuename not found)
 
-        [DllImport("user32.dll",CharSet = CharSet.Auto)]//import user32.dll for setting wallpapers
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]//import user32.dll for setting wallpapers
         static extern bool SystemParametersInfo(uint uiAction, uint uiParam, string pvParam, uint fwinIni);//SystemParametersInfo API call. Refer msdn docs for SPI_SETDESKWALLPAPER
 
         private int _ticks;//track the no of ticks
@@ -64,10 +56,10 @@ namespace WallpaperDroid
             {
                 File.Copy(originalWallpaper, Path.Combine(saveToPath, Path.GetFileName(originalWallpaper)), true);//overwrite=true
             }
-            catch {}
+            catch { }
 
 
-            screenResLabel.Text ="Your screen resolution: "+screenWidth+" x "+screenHeight;//shows resolution info
+            screenResLabel.Text = "Your screen resolution: " + screenWidth + " x " + screenHeight;//shows resolution info
         }
 
         private void tagForm_Resize(object sender, EventArgs e)
@@ -76,7 +68,7 @@ namespace WallpaperDroid
             this.Hide();
             notifyIcon1.Visible = true;
             notifyIcon1.ShowBalloonTip(1000);
-          
+
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -112,7 +104,7 @@ namespace WallpaperDroid
         {
             this.WindowState = FormWindowState.Normal;
             this.Show();
-            
+
         }
 
         private async void nextStripMenuItem_Click(object sender, EventArgs e)
@@ -172,7 +164,7 @@ namespace WallpaperDroid
 
 
         }
-            
+
 
         private static async Task<SearchResponse> getTopWallpapersAsync()
         {
@@ -180,7 +172,7 @@ namespace WallpaperDroid
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<SearchResponse>(json);
-            
+
         }
 
         private void setWallpaper(string wallpaperPath)
@@ -193,7 +185,7 @@ namespace WallpaperDroid
 
             setWallpaper(originalWallpaper);//sets the original wallpaper
             notifyIcon1.BalloonTipText = "Original wallpaper has been restored!";
-            
+
         }
 
         private async Task<string> downloadWallpaperAsync(string wallpaperURL)
@@ -206,7 +198,7 @@ namespace WallpaperDroid
                 return wallpaperPath;
 
             wallpaperPath = Path.Combine(wallpaperPath, fileName);//path on disk where wallpaper is stored
-            using (var fs = new FileStream(wallpaperPath,FileMode.CreateNew))//using automatically disposes of our filestream fs once task completes
+            using (var fs = new FileStream(wallpaperPath, FileMode.CreateNew))//using automatically disposes of our filestream fs once task completes
             {
                 await response.Content.CopyToAsync(fs);//store wallpaper onto disk
             }
@@ -228,7 +220,7 @@ namespace WallpaperDroid
 
         private void addTagButton_Click(object sender, EventArgs e)
         {
-            
+
             if (searchTextBox.Text == "")
             {
                 MessageBox.Show("Search tag can't be empty!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -252,7 +244,7 @@ namespace WallpaperDroid
             }
             catch { }*/
 
-          
+
 
         }
 
@@ -261,44 +253,70 @@ namespace WallpaperDroid
             try
             {
                 tagListBox.Items.RemoveAt(tagListBox.SelectedIndex);
-                
+
             }
             catch { }
         }
 
-   
+
         private void button2_Click(object sender, EventArgs e)
         {
+            
             if (textBox1.Text == "")
             {
                 MessageBox.Show("Please specify the time interval between wallpaper changes!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            button2.Text = "Stop task";
-            timer1.Start();
-            dueChangeLabel.Visible = true;
-            
+
+            if (button2.Text == "Schedule task")
+            {
+                button2.Text = "Stop task";
+                _ticks = 0;
+                nextTaskCountTimer.Start();
+                scheduleTimer.Interval = Int32.Parse(textBox1.Text) * 1000;
+                scheduleTimer.Start();
+                dueChangeLabel.Visible = true;
+
+            }
+            else if(button2.Text == "Stop task")
+            {
+                button2.Text = "Schedule task";
+                nextTaskCountTimer.Stop();
+                scheduleTimer.Stop();
+                dueChangeLabel.Visible = false;
+
+            }
+                        
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void nextTaskCountTimer_Tick(object sender, EventArgs e)
         {
             _ticks++;
-            dueChangeLabel.Text = "Next change due in: " + _ticks.ToString();
+            if (_ticks == Int32.Parse(textBox1.Text))
+                _ticks = 0;
+            dueChangeLabel.Text = "Next change due in: " + (Int32.Parse(textBox1.Text) - _ticks).ToString();
+        }
+
+        private void scheduleTimer_Tick(object sender, EventArgs e)
+        {
+            nextStripMenuItem_Click(sender,e);
         }
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             //only allow numbers
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) /*&& (e.KeyChar != '.')*/)
             {
                 e.Handled = true;
             }
 
-            // only allow one decimal point
+            /*// only allow one decimal point
             if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
             {
                 e.Handled = true;
-            }
+            }*/
         }
+
+
     }
 }

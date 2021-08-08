@@ -48,13 +48,14 @@ namespace WallpaperDroid
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.addTagButton = new System.Windows.Forms.Button();
             this.removeTagButton = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.dueChangeLabel = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.scheduleTimer = new System.Windows.Forms.Timer(this.components);
+            this.nextTaskCountTimer = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -207,6 +208,15 @@ namespace WallpaperDroid
             this.removeTagButton.UseVisualStyleBackColor = true;
             this.removeTagButton.Click += new System.EventHandler(this.removeTagButton_Click);
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(148, 19);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(115, 20);
+            this.textBox1.TabIndex = 1;
+            this.toolTip1.SetToolTip(this.textBox1, "Enter time interval in seconds.");
+            this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.dueChangeLabel);
@@ -250,15 +260,6 @@ namespace WallpaperDroid
             this.label2.TabIndex = 2;
             this.label2.Text = "seconds.";
             // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(148, 19);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(115, 20);
-            this.textBox1.TabIndex = 1;
-            this.toolTip1.SetToolTip(this.textBox1, "Enter time interval in seconds.");
-            this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -268,10 +269,15 @@ namespace WallpaperDroid
             this.label1.TabIndex = 0;
             this.label1.Text = "Auto-change wallpaper after ";
             // 
-            // timer1
+            // scheduleTimer
             // 
-            this.timer1.Interval = 1000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.scheduleTimer.Interval = 1000;
+            this.scheduleTimer.Tick += new System.EventHandler(this.scheduleTimer_Tick);
+            // 
+            // nextTaskCountTimer
+            // 
+            this.nextTaskCountTimer.Interval = 1000;
+            this.nextTaskCountTimer.Tick += new System.EventHandler(this.nextTaskCountTimer_Tick);
             // 
             // tagForm
             // 
@@ -289,6 +295,7 @@ namespace WallpaperDroid
             this.ShowInTaskbar = false;
             this.Style = MetroFramework.MetroColorStyle.Purple;
             this.Text = "WallpaperDroid";
+            this.TopMost = true;
             this.Load += new System.EventHandler(this.tagForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -322,8 +329,9 @@ namespace WallpaperDroid
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer scheduleTimer;
         private System.Windows.Forms.Label dueChangeLabel;
+        private System.Windows.Forms.Timer nextTaskCountTimer;
     }
 }
 
