@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -70,7 +71,10 @@ namespace WallpaperDroid
 
         private void button1_Click(object sender, EventArgs e)
         {
-            this.Hide();//minimize to tray once filters have been provided
+
+/*            this.Hide();//minimize to tray once filters have been provided*/
+            notifyIcon1.Visible = true;
+
             Array.Clear(apiURLRandom, 0, 3);//reset array everytime button is pressed before assigning again below
 
             //apply custom resolution and keywords
@@ -94,8 +98,9 @@ namespace WallpaperDroid
 
         private void restoreStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Normal;
             this.Show();
+            notifyIcon1.Visible = false;
+            WindowState = FormWindowState.Normal;
 
         }
 
@@ -118,14 +123,15 @@ namespace WallpaperDroid
             else
             {
                 //select random apiURL from apiURLRandom[0] to apiURLRandom[maxindex]
+                button1_Click(sender, e);
                 Random rand = new Random();
                 apiURL = apiURLRandom[rand.Next(0, tagListBox.Items.Count)];
             }
 
-            bool tryagain = true;
+/*            bool tryagain = true;*/
 
-            while (tryagain)
-            {
+/*            while (tryagain)
+            {*/
                 //get API response from wallhaven with async and await so our UI doesn't lag while it receives wallpapers
                 try
                 {
@@ -136,13 +142,18 @@ namespace WallpaperDroid
                     //code to set this wallpaper//
                     var wallpaperPath = await downloadWallpaperAsync(wallpaperURL);//download fetched wallpaperURL
                     setWallpaper(wallpaperPath);//set desktop wallpaper
-                    tryagain = false;//if no exception occurs, no need of running try block again
+/*                    tryagain = false;//if no exception occurs, no need of running try block again*/
                     nextStripMenuItem.Enabled = true;
                 }
 
-                catch (IOException)
+                catch (IOException ex)
                 {
-                    tryagain = true;//if file already exists, try again
+                    //get filepath that is causing IOException message since it already exists
+                    var existingFilePath = String.Join(";", Regex.Matches(ex.Message, @"\'(.+?)\'").Cast<Match>().Select(m => m.Groups[1].Value));
+
+                    setWallpaper(existingFilePath);
+
+/*                    tryagain = true;//if file already exists, try again*/
                     nextStripMenuItem.Enabled = true;
                     return;
 
@@ -152,7 +163,7 @@ namespace WallpaperDroid
                     MessageBox.Show("Please try again later! " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-            }
+/*            }*/
 
 
         }
@@ -167,7 +178,7 @@ namespace WallpaperDroid
 
         }
 
-        private void setWallpaper(string wallpaperPath)
+        public void setWallpaper(string wallpaperPath)
         {
             SystemParametersInfo(0x0014, 0, wallpaperPath, 0x0001);
         }
@@ -206,7 +217,7 @@ namespace WallpaperDroid
 
         private void addTagButton_Click(object sender, EventArgs e)
         {
-
+            button1_Click(sender, e);
             if (searchTextBox.Text == "")
             {
                 MessageBox.Show("Search tag can't be empty!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -221,6 +232,7 @@ namespace WallpaperDroid
             }
 
             tagListBox.Items.Add(searchTextBox.Text);
+
             searchTextBox.Text = "";
 
             /*try
@@ -238,7 +250,9 @@ namespace WallpaperDroid
         {
             try
             {
+                
                 tagListBox.Items.RemoveAt(tagListBox.SelectedIndex);
+                button1_Click(sender, e);
 
             }
             catch { }
@@ -259,9 +273,9 @@ namespace WallpaperDroid
                 return;
             }
 
-            if (button2.Text == "Schedule task")
+            if (button2.Text == "Start")
             {
-                button2.Text = "Stop task";
+                button2.Text = "Stop";
                 button1.Enabled = false;
                 addTagButton.Enabled = false;
                 removeTagButton.Enabled = false;
@@ -272,9 +286,9 @@ namespace WallpaperDroid
                 dueChangeLabel.Visible = true;
 
             }
-            else if(button2.Text == "Stop task")
+            else if(button2.Text == "Stop")
             {
-                button2.Text = "Schedule task";
+                button2.Text = "Start";
                 button1.Enabled = true;
                 addTagButton.Enabled = true;
                 removeTagButton.Enabled = true;
@@ -295,13 +309,20 @@ namespace WallpaperDroid
                 _ticks = 0;
 
             }
-            dueChangeLabel.Text = "Next change due in: " + (Int32.Parse(textBox1.Text) - _ticks).ToString();
+            dueChangeLabel.Text = "Expected change due in: " + (Int32.Parse(textBox1.Text) - _ticks).ToString()+" with delay ~5 seconds.";
         }
 
         private void scheduleTimer_Tick(object sender, EventArgs e)
         {
-            
-           nextStripMenuItem_Click(sender,e);//simply call next method
+            try
+            {
+                button1_Click(sender, e);
+                nextStripMenuItem_Click(sender, e);//simply call next method
+            }
+            catch (Exception ex)
+            {
+
+            }
             
         }
 
@@ -335,7 +356,7 @@ namespace WallpaperDroid
         private void notifyIcon1_DoubleClick(object sender, EventArgs e)
         {
             this.Show();
-            notifyIcon1.Visible = false;
+            notifyIcon1.Visible = true;
             WindowState = FormWindowState.Normal;
         }
     }
