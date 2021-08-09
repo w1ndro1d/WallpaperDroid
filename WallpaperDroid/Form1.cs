@@ -63,15 +63,6 @@ namespace WallpaperDroid
             screenResLabel.Text = "Your screen resolution: " + screenWidth + " x " + screenHeight;//shows resolution info
         }
 
-        private void tagForm_Resize(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Minimized;
-            this.Hide();
-            notifyIcon1.Visible = true;
-            notifyIcon1.ShowBalloonTip(1000);
-
-        }
-
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -206,12 +197,6 @@ namespace WallpaperDroid
             return wallpaperPath;
         }
 
-        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            this.WindowState = FormWindowState.Normal;
-            this.Show();
-        }
-
         private void searchTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             //doesn't allow white spaces to be typed in
@@ -335,6 +320,23 @@ namespace WallpaperDroid
             }*/
         }
 
+        private void tagForm_Resize(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Hide();
+                this.WindowState = FormWindowState.Normal;
 
+                notifyIcon1.Visible = true;
+                notifyIcon1.ShowBalloonTip(1000);
+            }
+        }
+
+        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        {
+            this.Show();
+            notifyIcon1.Visible = false;
+            WindowState = FormWindowState.Normal;
+        }
     }
 }
